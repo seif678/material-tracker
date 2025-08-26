@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Tracker Section -->
+<div id="tracker" class="dashboard-section">
+  <div class="row">
+    <div class="col-md-8">
+      <div class="form-container">
+        <h4 class="mb-4"><i class="fas fa-pen-alt me-2"></i>Record Material Consumption</h4>
+        <form id="consumptionForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="productionLine" class="form-label">Production Line</label>
+              <select class="form-select" id="productionLine" required>
+                <option value="">Select Line</option>
+                <option value="Line 1">Line 1</option>
+                <option value="Line 2">Line 2</option>
+                <option value="Line 3">Line 3</option>
+                <option value="Line 4">Line 4</option>
+                <option value="Line 6">Line 6</option>
+                <option value="Line 7">Line 7</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="shiftLeader" class="form-label">Shift Leader / Store Keeper</label>
+              <input type="text" class="form-control" id="shiftLeader" placeholder="Enter name" required>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="ripponAmount" class="form-label"><i class="fas fa-print material-icon"></i> Rippon Consumption</label>
+              <div class="input-group">
+                <input type="number" class="form-control" id="ripponAmount" placeholder="Units used" min="0" step="1" required>
+                <span class="input-group-text">units</span>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="labelAmount" class="form-label"><i class="fas fa-tag material-icon"></i> Label Consumption</label>
+              <div class="input-group">
+                <input type="number" class="form-control" id="labelAmount" placeholder="Units used" min="0" step="1" required>
+                <span class="input-group-text">units</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="notes" class="form-label"><i class="fas fa-sticky-note material-icon"></i> Notes</label>
+            <textarea class="form-control" id="notes" rows="2" placeholder="Any additional information"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-save me-2"></i>Save
+          </button>
+        </form>
+      </div>
+
+      <div class="card mt-4">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Consumption Records</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover consumption-table">
+              <thead>
+                <tr>
+                  <th>Date/Time</th>
+                  <th>Line</th>
+                  <th>Rippon</th>
+                  <th>Labels</th>
+                  <th>Shift Leader</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="consumptionTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Consumption Statistics</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-6 col-md-12">
+              <div class="stat-card mb-3">
+                <p><i class="fas fa-print fa-2x mb-2"></i></p>
+                <div class="stat-number" id="totalRippon">0</div>
+                <p class="text-muted">Total Rippon Used</p>
+              </div>
+            </div>
+            <div class="col-6 col-md-12">
+              <div class="stat-card mb-3">
+                <p><i class="fas fa-tag fa-2x mb-2"></i></p>
+                <div class="stat-number" id="totalLabels">0</div>
+                <p class="text-muted">Total Labels Used</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-4">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Inventory Status</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <h6>Rippon Inventory</h6>
+            <div class="progress mb-2">
+              <div class="progress-bar" role="progressbar" id="ripponProgress" style="width:65%">65%</div>
+            </div>
+            <small class="text-muted" id="ripponStatus">Approx 650 units remaining</small>
+          </div>
+
+          <div>
+            <h6>Label Inventory</h6>
+            <div class="progress mb-2">
+              <div class="progress-bar bg-success" role="progressbar" id="labelProgress" style="width:45%">45%</div>
+            </div>
+            <small class="text-muted" id="labelStatus">Approx 450 units remaining</small>
+          </div>
+
+          <div class="alert alert-warning mt-3 inventory-alert" id="reorderAlert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Reorder Alert:</strong> Labels need to be reordered soon.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard Section -->
+<div id="dashboard" class="dashboard-section">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h4><i class="fas fa-chart-bar me-2"></i>Consumption Dashboard</h4>
+        </div>
+        <div class="card-body">
+          <div class="row mb-4">
+            <div class="col-md-3">
+              <div class="stat-card">
+                <p><i class="fas fa-print fa-2x mb-2"></i></p>
+                <div class="stat-number" id="dashboardRippon">0</div>
+                <p class="text-muted">Total Rippon Used</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card">
+                <p><i class="fas fa-tag fa-2x mb-2"></i></p>
+                <div class="stat-number" id="dashboardLabels">0</div>
+                <p class="text-muted">Total Labels Used</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card">
+                <p><i class="fas fa-industry fa-2x mb-2"></i></p>
+                <div class="stat-number" id="dashboardLines">6</div>
+                <p class="text-muted">Production Lines</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card">
+                <p><i class="fas fa-users fa-2x mb-2"></i></p>
+                <div class="stat-number" id="dashboardShifts">0</div>
+                <p class="text-muted">Shift Records</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header"><h5>Daily Consumption Trend</h5></div>
+                <div class="card-body"><div class="chart-container"><canvas id="dailyConsumptionChart"></canvas></div></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header"><h5>Consumption by Production Line</h5></div>
+                <div class="card-body"><div class="chart-container"><canvas id="lineConsumptionChart"></canvas></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header"><h5>Inventory Status</h5></div>
+                <div class="card-body"><div class="chart-container"><canvas id="inventoryChart"></canvas></div></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header"><h5>Reorder Timeline Projection</h5></div>
+                <div class="card-body">
+                  <div class="chart-container"><canvas id="reorderChart"></canvas></div>
+                  <div id="reorderInfo" class="mt-3"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- History Section -->
+<div id="history" class="dashboard-section">
+  <div class="card">
+    <div class="card-header"><h4><i class="fas fa-history me-2"></i>Consumption History</h4></div>
+    <div class="card-body">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text">Filter by Date</span>
+            <input type="date" class="form-control" id="filterDate">
+            <button class="btn btn-outline-secondary" type="button" id="clearDateFilter">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text">Filter by Line</span>
+            <select class="form-select" id="filterLine">
+              <option value="">All Lines</option>
+              <option value="Line 1">Line 1</option>
+              <option value="Line 2">Line 2</option>
+              <option value="Line 3">Line 3</option>
+              <option value="Line 4">Line 4</option>
+              <option value="Line 6">Line 6</option>
+              <option value="Line 7">Line 7</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th>Date/Time</th>
+              <th>Day</th>
+              <th>Line</th>
+              <th>Rippon</th>
+              <th>Labels</th>
+              <th>Shift Leader</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
